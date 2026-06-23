@@ -2,7 +2,7 @@ backend:
   name: github
   repo: 7h3kn0w3r/7h3kn0w3r.github.io
   branch: main
-  base_url: https://zero-trust-git-main-sasas-projects-d455520b.vercel.app
+  base_url: https://zero-trust-delta.vercel.app
   auth_endpoint: api/auth
 
 media_folder: "public/uploads"
