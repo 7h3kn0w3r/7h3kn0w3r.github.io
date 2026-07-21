@@ -31,33 +31,94 @@ const featuredProjects = [
 ---
 
 <Layout>
-  <!-- Hero Section -->
-  <section class="mb-16 md:mb-24">
-    <div class="max-w-3xl">
-      <div class="inline-block border border-[#B3001B]/30 bg-[#B3001B]/5 px-2.5 py-1 text-[10px] font-mono tracking-widest text-[#B3001B] uppercase mb-4">
+<!-- Hero Section -->
+<section class="mb-20 md:mb-28">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+    <!-- Left -->
+    <div>
+      <div class="inline-flex items-center border border-[#B3001B]/30 bg-[#B3001B]/5 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.2em] text-[#B3001B] rounded-sm mb-5">
         Trace ID: #9821-SECURE
       </div>
-      <h1 class="font-display font-bold text-3xl md:text-5xl tracking-tight mb-3">
-        Hello, I'm <span class="text-glow text-white">Mostafa Mahmoud</span>
+
+      <h1 class="font-display font-bold text-4xl md:text-6xl leading-tight">
+        Hello, I'm
+        <span class="text-white text-glow block">Mostafa Mahmoud</span>
       </h1>
-      <p class="font-mono text-sm md:text-base text-neutral-400 mb-6 uppercase tracking-wider">
-        <span class="typewriter text-white font-semibold">SOC Analyst / DFIR CTF Player </span>
+
+      <p class="mt-4 font-mono uppercase tracking-widest text-sm text-[#B3001B]">
+        SOC Analyst • DFIR • Threat Hunter • CTF Player
       </p>
-      
-      <p class="text-sm md:text-base text-neutral-300 leading-relaxed mb-8">
-        SOC Analyst passionate about Digital Forensics & Incident Response (DFIR), with a strong interest in incident investigation, threat analysis, and understanding attack techniques. Dedicated to continuous learning and practical cybersecurity research. Active CTF Player driven by curiosity, problem-solving, and hands-on security challenges.  
+
+      <p class="mt-6 text-neutral-300 leading-8 max-w-xl">
+        Cybersecurity analyst focused on Digital Forensics, Incident Response,
+        and Threat Hunting. Passionate about investigating security incidents,
+        analyzing attacker behavior, and solving real-world security challenges
+        through continuous learning and hands-on research.
       </p>
-      
-      <div class="flex flex-wrap gap-4 font-mono text-xs uppercase">
-        <a href="https://github.com/7h3kn0w3r" target="_blank" rel="noopener noreferrer" class="btn-accent px-5 py-2.5 flex items-center space-x-2 border border-[#B3001B] rounded-sm">
-          <span>[ GitHub Profile ]</span>
+
+      <div class="mt-8 flex flex-wrap gap-4 font-mono text-xs uppercase">
+        <a
+          href="https://github.com/7h3kn0w3r"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="px-5 py-3 border border-[#B3001B] text-white hover:bg-[#B3001B] transition rounded-sm"
+        >
+          [ GitHub ]
         </a>
-        <a href="/resume.pdf" class="border border-neutral-800 hover:border-neutral-500 text-neutral-300 hover:text-white px-5 py-2.5 transition-colors rounded-sm">
-          [ Download Resume ]
+
+        <a
+          href="https://www.linkedin.com/in/7h3kn0w3r/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="px-5 py-3 border border-neutral-700 hover:border-white transition rounded-sm"
+        >
+          [ LinkedIn ]
+        </a>
+
+        <a
+          href="/resume.pdf"
+          class="px-5 py-3 border border-neutral-700 hover:border-white transition rounded-sm"
+        >
+          [ Resume ]
         </a>
       </div>
     </div>
-  </section>
+
+    <!-- Right -->
+    <div class="flex justify-center lg:justify-end">
+      <div class="relative">
+
+        <div class="absolute -inset-2 rounded-full border border-[#B3001B]/30 animate-pulse"></div>
+
+        <img
+          src="/images/profile.jpg"
+          alt="Mostafa Mahmoud"
+          class="relative w-72 h-72 object-cover rounded-full border-2 border-[#B3001B] shadow-[0_0_40px_rgba(179,0,27,.25)]"
+        />
+
+        <div class="mt-6 border border-neutral-900 bg-[#1b1b1b]/70 p-4 rounded-sm font-mono text-xs">
+          <div class="flex justify-between">
+            <span class="text-neutral-500">Status</span>
+            <span class="text-green-400">ONLINE</span>
+          </div>
+
+          <div class="flex justify-between mt-2">
+            <span class="text-neutral-500">Focus</span>
+            <span class="text-white">DFIR</span>
+          </div>
+
+          <div class="flex justify-between mt-2">
+            <span class="text-neutral-500">Location</span>
+            <span class="text-white">Egypt</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
 
   <!-- About Preview Section -->
   <section class="mb-20 border-t border-neutral-900 pt-16">
@@ -90,7 +151,7 @@ const featuredProjects = [
     <div class="flex flex-col md:flex-row md:items-baseline justify-between mb-8">
       <div>
         <h2 class="font-display font-bold text-lg uppercase tracking-wider text-glow text-white">
-          <span class="text-[#B3001B] font-bold">//</span> Active Repositories
+          <span class="text-[#B3001B] font-bold">//</span> Research & Labs & Tools
         </h2>
         <p class="font-mono text-[10px] text-neutral-500 uppercase mt-1">SECURE_FILES // PORTFOLIO</p>
       </div>

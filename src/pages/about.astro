@@ -2,30 +2,28 @@
 import Layout from '../layouts/Layout.astro';
 
 const skills = [
-  { category: "Vulnerability Research", items: ["Binary Exploitation (x86/MIPS)", "Reverse Engineering (Ghidra, IDA)", "Firmware Auditing", "Static/Dynamic Analysis"] },
-  { category: "Security Evasion", items: ["User-Mode EDR Evasion", "Process Injection Tactics", "Windows / Linux Kernel Hooks", "Obfuscation & Cryptography"] },
-  { category: "Systems Development", items: ["Rust (Low-Level / Tooling)", "Go (Networking / Concurrency)", "C / C++ (Win32 / System)", "Python (Automation)"] },
-  { category: "Infrastructure & Tools", items: ["Linux Kernel Security", "Docker & Kubernetes Security", "CI/CD Hardening", "Raw Socket Analysis (Wireshark)"] }
+  { category: "DFIR", items: ["Volatility", "Autopsy", "FTK Imager", "Registry Forensics", "wireshark", "chainsaw", "ERIC Zimmermen Tools"] },
+  { category: "Threat Hunting", items: ["ٍSplunk", "ELK", "Wazuh", "Velociraptor"] },
+  { category: "CTFS", items: ["OSINT", "DFIR", "STEGO", "CRYPTO"] },
+  { category: "Soft Skills", items: ["Analytical Thinking", "Attention to Detail", "Team Collaboration", "Research Mindset"] }
 ];
 
 const timeline = [
   {
-    date: "2024 - Present",
-    role: "Senior Security Analyst",
-    company: "HexaShield Security",
-    description: "Conducting grey-box firmware evaluations, custom threat simulation tools development, and Red Team operations auditing embedded systems."
+    date: "2026 - Present",
+    description: "Ongoing attempts to secure a job"
   },
   {
-    date: "2022 - 2024",
-    role: "Vulnerability Engineer",
-    company: "ZeroDay Labs",
-    description: "Reverse engineered commercial SoHo routers and IoT devices. Discovered and patched multiple CVEs in administrative network services."
+    date: "2025-12-29",
+    role: "eCTHP",
+    company: "INE",
+    description: "professional-level certification that proves your threat hunting and threat identification capabilities."
   },
   {
-    date: "2020 - 2022",
-    role: "Systems Developer",
-    company: "Apex Systems",
-    description: "Developed backend security logging infrastructure and custom network packet capture monitors in Rust and Go."
+    date: "2025-4-24",
+    role: "Aswan CTF",
+    company: "1st Upper Egypt",
+    description: "My First Offline CTF"
   }
 ];
 ---
@@ -37,20 +35,20 @@ const timeline = [
       <div class="inline-block border border-accent/30 bg-accent/5 px-2.5 py-1 text-[10px] font-mono tracking-widest text-accent uppercase mb-3">
         Dossier Type: PERSONNEL_FILE_0x44
       </div>
-      <h1 class="font-display font-bold text-3xl tracking-tight mb-2">Personnel Dossier</h1>
-      <p class="font-mono text-xs text-neutral-400 uppercase tracking-widest">Operator: Alexander Noir</p>
+      <h1 class="font-display font-bold text-3xl tracking-tight mb-2">Personnel File</h1>
+      <p class="font-mono text-xs text-neutral-400 uppercase tracking-widest">Operator: Mostafa Mahmoud</p>
     </div>
 
     <!-- Biography -->
     <div class="text-sm md:text-base text-neutral-300 space-y-6 leading-relaxed mb-16">
       <p>
-        I am a developer and security researcher focused on exploring the boundary between system development and vulnerability analysis. My work spans deep dive firmware reverse engineering, protocol audits, and low-level code compilation.
+        I am a cybersecurity analyst with a strong focus on digital forensics, incident response, and threat hunting. I enjoy investigating security incidents and reconstructing attacker activity through evidence-driven analysis.
       </p>
       <p>
-        I have a strong passion for writing secure, performant systems in <span class="text-white font-mono">Rust</span> and <span class="text-white font-mono">Go</span>, alongside writing proof-of-concept exploits to test modern endpoint defenses.
+        My work includes memory forensics, Windows event log analysis, malware investigation, and SIEM-based detection. I focus on understanding attacker techniques and turning forensic findings into actionable security insights.
       </p>
       <p>
-        Currently, I collaborate with vendors under responsible disclosure frameworks to secure their supply chains and embedded appliances, while occasionally participating in high-level CTF competitions.
+        I continuously improve my skills through DFIR labs, CTF competitions, and security research, with the goal of helping organizations detect, investigate, and respond to modern cyber threats.
       </p>
     </div>
 

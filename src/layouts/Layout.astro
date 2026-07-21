@@ -46,9 +46,7 @@ const baseUrl = import.meta.env.BASE_URL;
     <meta property="twitter:image" content={new URL(image, Astro.url.origin)} />
     
     <link rel="icon" type="image/svg+xml" href={`${baseUrl}favicon.svg`} />
-    
-    <link rel="alternate" type="application/rss+xml" title="Noir Trace Writeups RSS Feed" href={`${baseUrl}rss.xml`} />
-    
+       
     <script is:inline>
       (function() {
         try {
@@ -89,7 +87,7 @@ const baseUrl = import.meta.env.BASE_URL;
         <nav class="hidden md:flex items-center space-x-6 text-xs uppercase tracking-wider font-sans">
           <a href={baseUrl} class="text-neutral-400 hover:text-white transition-colors py-1">Home</a>
           <a href={`${baseUrl}about`} class="text-neutral-400 hover:text-white transition-colors py-1">About</a>
-          <a href={`${baseUrl}projects`} class="text-neutral-400 hover:text-white transition-colors py-1">Projects</a>
+          <a href={`${baseUrl}projects`} class="text-neutral-400 hover:text-white transition-colors py-1">Research & Labs & Tools </a>
           <a href={`${baseUrl}blog`} class="text-neutral-400 hover:text-white transition-colors py-1">Writeups</a>
           <a href={`${baseUrl}contact`} class="text-neutral-400 hover:text-white transition-colors py-1">Contact</a>
           <a href={`${baseUrl}admin/`} class="border border-neutral-800 px-3 py-1 hover:border-accent hover:text-accent transition-all rounded-sm">CMS</a>
@@ -106,7 +104,7 @@ const baseUrl = import.meta.env.BASE_URL;
       <nav id="mobile-nav" class="hidden md:hidden border-t border-neutral-900 bg-bg-dark px-4 py-4 space-y-3 font-sans text-xs uppercase tracking-wider">
         <a href={baseUrl} class="block text-neutral-400 hover:text-white py-1 transition-colors">Home</a>
         <a href={`${baseUrl}about`} class="block text-neutral-400 hover:text-white py-1 transition-colors">About</a>
-        <a href={`${baseUrl}projects`} class="block text-neutral-400 hover:text-white py-1 transition-colors">Projects</a>
+        <a href={`${baseUrl}projects`} class="block text-neutral-400 hover:text-white py-1 transition-colors">Research & Labs</a>
         <a href={`${baseUrl}blog`} class="block text-neutral-400 hover:text-white py-1 transition-colors">Writeups</a>
         <a href={`${baseUrl}contact`} class="block text-neutral-400 hover:text-white py-1 transition-colors">Contact</a>
         <a href={`${baseUrl}admin/`} class="inline-block border border-neutral-800 px-3 py-1 hover:border-accent hover:text-accent transition-all rounded-sm">CMS</a>
@@ -125,12 +123,10 @@ const baseUrl = import.meta.env.BASE_URL;
           <span class="text-neutral-600">FOOTPRINT: SECURE</span>
         </div>
         <div class="flex items-center space-x-4">
-          <a href="https://github.com" class="hover:text-white transition-colors">GITHUB</a>
+          <a href="https://github.com/7h3kn0w3r" class="hover:text-white transition-colors">GITHUB</a>
           <span class="text-neutral-800">//</span>
-          <a href={`${baseUrl}rss.xml`} class="hover:text-white transition-colors">RSS</a>
-          <span class="text-neutral-800">//</span>
-          <a href={`${baseUrl}sitemap-index.xml`} class="hover:text-white transition-colors">SITEMAP</a>
-        </div>
+          <a href="https://www.linkedin.com/in/7h3kn0w3r/" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">LinkedIn</a>
+		  </div>
       </div>
     </footer>
     
