@@ -8,7 +8,7 @@ tags:
 cover_image: /uploads/cover-2-.png
 draft: false
 ---
-## 1- How Data Deduplication
+## How Data Deduplication Work
 
 Before we learn how Windows Data Deduplication works, we first need to understand the problem it was designed to solve.\
 Modern organizations store enormous amounts of data. File servers, virtual machines, backups, databases, and user documents can easily consume terabytes or even petabytes of storage.\
@@ -80,3 +80,17 @@ Because the fingerprint depends only on the *local* bytes under the window, a ch
 This is *why* content-defined chunking is the standard for real-world dedup: it isolates edits to a small local region and keeps everything else deduplicable.
 
 ![](/uploads/gemini_generated_image_n4szddn4szddn4sz.png)
+
+## Windows Deduplication Storage Architecture
+
+This is **not** an introduction to NTFS. Instead, the following sections provide only the concepts necessary to understand how Windows stores and reconstructs deduplicated files.
+
+If you are already familiar with NTFS, you can safely skip this section.
+
+For readers who would like a deeper understanding of NTFS internals, I highly recommend the following references:
+
+* <https://internals-for-interns.com/posts/ntfs-filesystem/>
+* <https://a1l4m.github.io/research/posts/MFT/index.html>
+* <https://thrwt.ninja/NOTES/MFT.html>
+
+Throughout this research, we only need to understand one NTFS attributes: `$REPARSE_POINT`.
