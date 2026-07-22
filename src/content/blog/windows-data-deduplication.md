@@ -47,36 +47,27 @@ Data Deduplication takes a different approach. Instead of storing each file as a
 
    ![](/uploads/understanding-dedup-how-dedup-works-4.gif)
 
-**Where exactly do you cut?**
+### Where exactly do you cut?
 
-### Attempt 1: Fixed-size chunking
+#### Attempt 1: Fixed-size chunking
 
 The simplest idea: cut every file into blocks of exactly, say, 64 KB.
-
-```
-File: [============================================]
-       |--64KB--|--64KB--|--64KB--|--64KB--|--...
-```
 
 Simple to implement. Fast to compute. But it has a fatal weakness, and it's the single most important concept in this entire chapter, so slow down and read this carefully.
 
 Imagine `document_v1.docx` and `document_v2.docx` are identical except someone typed one extra sentence at the very beginning.
 
-```
-document_v1: [AAAAAAAA][BBBBBBBB][CCCCCCCC][DDDDDDDD]
-document_v2: [XAAAAAAA][ABBBBBBB][BCCCCCCC][CDDDDDDD]
-                ^ one byte inserted at the start shifts EVERYTHING after it
-```
-
 Because fixed-size chunking cuts at rigid byte offsets (0, 64K, 128K, 192K...), inserting even a single byte at the beginning shifts every single chunk boundary that comes after it. The result: `document_v2` shares *zero* chunks with `document_v1`, even though 99.9% of the actual content is identical.
 
 This is called the **boundary-shift problem**, and it's the reason fixed-size chunking, while simple, performs poorly on real-world edited documents (contracts, source code, logs — anything that gets incrementally modified).
 
-### Attempt 2: Content-defined chunking (variable-size)
+#### Attempt 2: Content-defined chunking (variable-size)
 
 What if, instead of cutting at fixed byte positions, we cut at positions determined by the *content itself*? Then inserting a byte at the start would only affect the *one chunk* containing that insertion — every chunk after it stays byte-identical and gets recognized as a duplicate.
 
-This is done using a **rolling hash** — most famously, the **Rabin fingerprint** algorithm (Rabin, 1981), which Windows' post-process engine and many other dedup systems rely on conceptually.
+This is done using a **rolling hash** — most famously, the **Rabin fingerprint** algorithm (Rabin, 1981), which Windows' post-process engine and many other dedup systems rely on conceptually. 
+
+For more details about Rabin fingerprint <https://moinakg.wordpress.com/tag/rabin-fingerprint/>
 
 Here's the intuition, no math required yet:
 
@@ -84,26 +75,8 @@ Here's the intuition, no math required yet:
 2. At every position, compute a fingerprint value from the bytes currently inside the window.
 3. Whenever that fingerprint matches a specific pattern (e.g., its lowest N bits are all zero), declare "chunk boundary here."
 
-```
- sliding window (48 bytes) -->
- [xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx]
-   [xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx]
-     [xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx]
-                                     ^
-                          fingerprint matches pattern
-                          -> CUT HERE
-```
-
 Because the fingerprint depends only on the *local* bytes under the window, a change far away doesn't affect it. Insert a byte at the start of the file, and the cut points simply *shift along with the insertion* — everything after the edit still produces the exact same chunks as before.
-
-```
-document_v1: [ChunkA][ChunkB][ChunkC][ChunkD]
-document_v2: [Chunk_Edited][ChunkB][ChunkC][ChunkD]
-                              ^^^^^^^^^^^^^^^^^^^^ still identical! reused!
-```
 
 This is *why* content-defined chunking is the standard for real-world dedup: it isolates edits to a small local region and keeps everything else deduplicable.
 
-
-
-- - -
+![](/uploads/gemini_generated_image_n4szddn4szddn4sz.png)
