@@ -142,7 +142,7 @@ When Windows opens a deduplicated file, it performs the following steps:
 
 > > **The Stream File acts as a blueprint for reconstructing the original file. It contains a Stream Map that defines the ordered sequence of chunks required to rebuild the file from the Chunk Store.**
 
-#### 3 - Chunk Lookup (Ckhr)
+### 3 - Chunk Lookup (Ckhr)
 
 The **Stream File** tells Windows **which chunks** are required to reconstruct a file, but it does not specify **where those chunks are physically stored**.
 
@@ -212,3 +212,21 @@ At this point, we have identified all of the core components involved in Windows
 - - -
 
 # Practical Analysis
+
+Now, let's examine a real-world case and apply what we've learned.
+
+![](/uploads/screenshot-2026-07-23-062236.png)
+
+
+
+The first indication that Data Deduplication is enabled appears when examining the file in **FTK Imager**. Although the file still exists and its original size is preserved, the data area is filled entirely with `0x00` bytes instead of the expected file content.
+
+Next, we'll inspect the file's MFT entry using MFT Explorer to identify the NTFS attributes associated with the deduplicated file. 
+
+![](/uploads/screenshot-2026-07-23-062516.png)
+
+Now, let's reverse engineer the `$REPARSE_POINT` to understand its structure and identify the metadata Windows uses to locate the deduplicated data.
+
+![](/uploads/gemini_generated_image_d0i1ldd0i1ldd0i1.png)
+
+![](/uploads/your-paragraph-text.png)
