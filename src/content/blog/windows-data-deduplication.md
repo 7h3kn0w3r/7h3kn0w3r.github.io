@@ -230,3 +230,22 @@ Now, let's reverse engineer the `$REPARSE_POINT` to understand its structure and
 ![](/uploads/gemini_generated_image_d0i1ldd0i1ldd0i1.png)
 
 ![](/uploads/your-paragraph-text.png)
+
+Now we can extract the Stream Header Identifier from the $REPARSE_POINT.
+
+`F0 97 3C BB 3C 2B 95 86 4E E8 40 9F 58 68 79 17 C2 B1 86 5E 01 75 73 1E 68 95 F7 80 8C 86 7D 19`
+
+> Note: The length and format of the Stream Header Identifier may vary between different versions of Windows Data Deduplication.
+
+Each deduplicated file has a corresponding **CKHR structure** within its Stream File. In our case, the Stream File is located at:
+
+```
+System Volume Information\Dedup\ChunkStore\
+{6F89FF76-AE45-4802-BD0E-4075177C075F}.ddp\
+Stream\
+00010000.00000001.ccc
+```
+
+
+
+Now, let's reverse engineer the Stream File to understand its structure and how Windows maps a deduplicated file to its chunks.
