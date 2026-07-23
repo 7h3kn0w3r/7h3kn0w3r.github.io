@@ -83,6 +83,14 @@ This is *why* content-defined chunking is the standard for real-world dedup: it 
 
 ## Windows Deduplication Storage Architecture
 
+The three core components of Windows Data Deduplication are:
+
+1. **`$REPARSE_POINT`** – The starting point. It marks the file as deduplicated and provides the metadata required to locate its associated stream.
+2. Stream File / Stream Map – The reconstruction blueprint. It contains the ordered list of chunk references that describes how the original file can be rebuilt.
+3. **Chunk Store (Container Files)** – The physical storage location for the actual data. It stores unique chunks inside container (`.ccc`) files, allowing multiple files to share identical data without duplication.
+
+### 1-**`REPARSE_POINT`** 
+
 This is **not** an introduction to NTFS. Instead, the following sections provide only the concepts necessary to understand how Windows stores and reconstructs deduplicated files.
 
 If you are already familiar with NTFS, you can safely skip this section.
@@ -93,4 +101,26 @@ For readers who would like a deeper understanding of NTFS internals, I highly re
 * <https://a1l4m.github.io/research/posts/MFT/index.html>
 * <https://thrwt.ninja/NOTES/MFT.html>
 
-Throughout this research, we only need to understand one NTFS attributes: `$REPARSE_POINT`.
+Throughout this research, we only need to understand one NTFS attributes: `REPARSE_POINT`.
+
+When a file is optimized by Windows Data Deduplication, Windows adds a `REPARSE_POINT` attribute to its MFT entry. This attribute indicates that the file is no longer stored as a traditional NTFS file and must be processed by the Deduplication filter driver.
+
+The reparse point contains several pieces of metadata that are essential for locating the deduplicated data.
+
+Among the most important fields are:
+
+* **Original File Size** – The logical size of the file before deduplication. This is the size that applications see when accessing the file.
+* **Chunk Store Identifier (GUID)** – A unique identifier that specifies which Chunk Store contains the file's deduplicated data.
+* **Stream Header** – A unique identifier used to locate the corresponding stream metadata. The stream metadata describes how the original file can be reconstructed by referencing chunks stored in the Chunk Store.
+
+The `REPARSE_POINT` attribute does **not** contain the actual file data. Instead, it provides the information required for Windows to locate the stream metadata, which ultimately leads to the chunks needed to reconstruct the original file.
+
+#### Reverse Engineering the `$REPARSE_POINT`
+
+![](/uploads/gemini_generated_image_d0i1ldd0i1ldd0i1.png)
+
+> The Stream Header acts as a unique identifier that allows Windows to locate the correct stream metadata for the deduplicated file. This stream metadata contains the mapping between the file and the chunks stored in the Chunk Store.
+
+### 2- The Stream Map File (`.stream` metadata)
+
+After a file is optimized, Windows no longer stores the original file contents directly inside the file. Instead, it creates a **Stream File**, which contains the metadata required to reconstruct the original file.
