@@ -209,7 +209,7 @@ Each chunk stored inside a container has its own metadata, including information
 
 At this point, we have identified all of the core components involved in Windows Data Deduplication. The next step is to reverse engineer the container format itself and understand how individual chunks are stored inside a `.ccc` file. 
 
-# Practical Analysis
+## Practical Analysis
 
 Now, let's examine a real-world case and apply what we've learned.
 
