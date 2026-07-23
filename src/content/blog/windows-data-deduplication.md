@@ -178,7 +178,11 @@ System Volume Information
 The **Data** directory contains the container (`.ccc`) files that hold the physical chunk data.
 
 ```
-
+Data
+├── 00000001.00000001.ccc
+├── 00000002.00000001.ccc
+├── 00000003.00000001.ccc
+└── ...
 ```
 
 Instead of creating one file for every chunk, Windows packs many chunks into a single container file. This significantly reduces NTFS metadata overhead and improves storage efficiency.
