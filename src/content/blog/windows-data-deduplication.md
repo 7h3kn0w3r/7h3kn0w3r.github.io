@@ -268,3 +268,15 @@ Data\
 This is where the actual chunk data is physically stored. Unlike the Stream File, which only contains metadata and chunk references, the Chunk File stores the compressed data blocks that make up the original file.
 
 Now, let's reverse engineer the Chunk File to understand its internal structure and how Windows stores the physical chunk data used to reconstruct a deduplicated file.
+
+![](/uploads/your-paragraph-text-1-.png)
+
+At this point, we have collected all the information required to reconstruct the original file. We have identified the `$REPARSE_POINT`, extracted the Stream Header Identifier, parsed the Stream File to obtain the chunk references, and located the corresponding chunks within the Chunk Store. We can now extract the required chunks and reassemble them to recover the original file.
+
+First Chunk
+
+![](/uploads/image.png)
+
+second chunk
+
+![](/uploads/image2.png)
