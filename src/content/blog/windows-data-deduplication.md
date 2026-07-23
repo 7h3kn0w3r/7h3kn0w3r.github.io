@@ -61,11 +61,11 @@ The simplest idea: cut every file into blocks of exactly, say, 64 KB.
 
 Simple to implement. Fast to compute. But it has a fatal weakness, and it's the single most important concept in this entire chapter, so slow down and read this carefully.
 
-Imagine `document_v1.docx`  and  `document_v2.docx `are identical except someone typed one extra sentence at the very beginning.
+Imagine `document_v1.docx`  and  `document_v2.docx`are identical except someone typed one extra sentence at the very beginning.
 
 Because fixed-size chunking cuts at rigid byte offsets (0, 64K, 128K, 192K...), inserting even a single byte at the beginning shifts every single chunk boundary that comes after it. The result: 
 
-`document_v2 `shares *zero* chunks with `document_v1 `, even though 99.9% of the actual content is identical. This is called the **boundary-shift problem** , and it's the reason fixed-size chunking, while simple, performs poorly on real-world edited documents (contracts, source code, logs — anything that gets incrementally modified).
+`document_v2`shares *zero* chunks with `document_v1`, even though 99.9% of the actual content is identical. This is called the **boundary-shift problem** , and it's the reason fixed-size chunking, while simple, performs poorly on real-world edited documents (contracts, source code, logs — anything that gets incrementally modified).
 
 **Attempt 2: Content-defined chunking (variable-size)**
 
@@ -209,15 +209,11 @@ Each chunk stored inside a container has its own metadata, including information
 
 At this point, we have identified all of the core components involved in Windows Data Deduplication. The next step is to reverse engineer the container format itself and understand how individual chunks are stored inside a `.ccc` file. 
 
-- - -
-
 # Practical Analysis
 
 Now, let's examine a real-world case and apply what we've learned.
 
 ![](/uploads/screenshot-2026-07-23-062236.png)
-
-
 
 The first indication that Data Deduplication is enabled appears when examining the file in **FTK Imager**. Although the file still exists and its original size is preserved, the data area is filled entirely with `0x00` bytes instead of the expected file content.
 
@@ -245,8 +241,6 @@ System Volume Information\Dedup\ChunkStore\
 Stream\
 00010000.00000001.ccc
 ```
-
-
 
 Now, let's reverse engineer the Stream File to understand its structure and how Windows maps a deduplicated file to its chunks.
 
