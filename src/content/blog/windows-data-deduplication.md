@@ -15,113 +15,75 @@ Modern organizations store enormous amounts of data. File servers, virtual machi
 One common problem is that much of this data is duplicated.\
 Imagine a company that stores the following files: 
 
-> File A
->
-> Windows_Server_Backup.vhdx
->
-> File B
->
-> Windows_Server_Backup_Copy.vhdx
->
-> File C\
-> Windows_Server_Backup_2026.vhdx
->
-> In a traditional file system, each file is stored independently, even if most or all of its content is identical to another file. This results in multiple copies of the same data being written to disk, wasting valuable storage space.
->
-> Data Deduplication takes a different approach. Instead of storing each file as a complete, independent copy, it breaks file data into smaller pieces called 
->
-> **chunks**
->
-> . Each chunk is analyzed, and only unique chunks are stored in a shared storage area known as the 
->
-> **Chunk Store**
->
-> . If another file contains a chunk that has already been stored, Windows simply creates a reference to the existing chunk instead of writing a duplicate copy.
->
-> This occurs in the following four steps:
->
-> * Scan the file system for files meeting the optimization policy.
->
->   ![](/uploads/understanding-dedup-how-dedup-works-1.gif)
-> * Break files into variable-size chunks.
->
->   ![](/uploads/understanding-dedup-how-dedup-works-2.gif)
-> * Identify unique chunks.
->
->   ![](/uploads/understanding-dedup-how-dedup-works-3.gif)
-> * Place chunks in the chunk store and optionally compress.
->
->   ![](/uploads/understanding-dedup-how-dedup-works-4.gif)
->
-> Where exactly do you cut?
->
-> Attempt 1: Fixed-size chunking
->
-> The simplest idea: cut every file into blocks of exactly, say, 64 KB.
->
-> Simple to implement. Fast to compute. But it has a fatal weakness, and it's the single most important concept in this entire chapter, so slow down and read this carefully.
->
-> Imagine 
->
-> `document_v1.docx`
->
->  and 
->
-> `document_v2.docx`
->
->  are identical except someone typed one extra sentence at the very beginning.
->
-> Because fixed-size chunking cuts at rigid byte offsets (0, 64K, 128K, 192K...), inserting even a single byte at the beginning shifts every single chunk boundary that comes after it. The result: 
->
-> `document_v2`
->
->  shares 
->
-> *zero*
->
->  chunks with 
->
-> `document_v1`
->
-> , even though 99.9% of the actual content is identical.
->
-> This is called the 
->
-> **boundary-shift problem**
->
-> , and it's the reason fixed-size chunking, while simple, performs poorly on real-world edited documents (contracts, source code, logs — anything that gets incrementally modified).
->
-> Attempt 2: Content-defined chunking (variable-size)
->
-> What if, instead of cutting at fixed byte positions, we cut at positions determined by the 
->
-> *content itself*
->
-> ? Then inserting a byte at the start would only affect the 
->
-> *one chunk*
->
->  containing that insertion — every chunk after it stays byte-identical and gets recognized as a duplicate.
->
-> This is done using a 
->
-> **rolling hash**
->
->  — most famously, the 
->
-> **Rabin fingerprint**
->
->  algorithm (Rabin, 1981), which Windows' post-process engine and many other dedup systems rely on conceptually. 
->
-> For more details about Rabin fingerprint 
->
-> <https://moinakg.wordpress.com/tag/rabin-fingerprint/>
->
-> Here's the intuition, no math required yet:
->
-> * Slide a fixed-size "window" (say, 48 bytes) across the file, byte by byte.
-> * At every position, compute a fingerprint value from the bytes currently inside the window.
-> * Whenever that fingerprint matches a specific pattern (e.g., its lowest N bits are all zero), declare "chunk boundary here."
+File A
+
+Windows_Server_Backup.vhdx
+
+File B
+
+Windows_Server_Backup_Copy.vhdx
+
+File C\
+Windows_Server_Backup_2026.vhdx
+
+In a traditional file system, each file is stored independently, even if most or all of its content is identical to another file. This results in multiple copies of the same data being written to disk, wasting valuable storage space.
+
+Data Deduplication takes a different approach. Instead of storing each file as a complete, independent copy, it breaks file data into smaller pieces called 
+
+**chunks**
+
+. Each chunk is analyzed, and only unique chunks are stored in a shared storage area known as the 
+
+**Chunk Store**
+
+. If another file contains a chunk that has already been stored, Windows simply creates a reference to the existing chunk instead of writing a duplicate copy.
+
+This occurs in the following four steps:
+
+* Scan the file system for files meeting the optimization policy.
+
+  ![](/uploads/understanding-dedup-how-dedup-works-1.gif)
+* Break files into variable-size chunks.
+
+  ![](/uploads/understanding-dedup-how-dedup-works-2.gif)
+* Identify unique chunks.
+
+  ![](/uploads/understanding-dedup-how-dedup-works-3.gif)
+* Place chunks in the chunk store and optionally compress.
+
+  ![](/uploads/understanding-dedup-how-dedup-works-4.gif)
+
+Where exactly do you cut?
+
+**Attempt 1: Fixed-size chunking**
+
+The simplest idea: cut every file into blocks of exactly, say, 64 KB.
+
+Simple to implement. Fast to compute. But it has a fatal weakness, and it's the single most important concept in this entire chapter, so slow down and read this carefully.
+
+Imagine `document_v1.docx`  and  `document_v2.docx `are identical except someone typed one extra sentence at the very beginning.
+
+Because fixed-size chunking cuts at rigid byte offsets (0, 64K, 128K, 192K...), inserting even a single byte at the beginning shifts every single chunk boundary that comes after it. The result: 
+
+`document_v2 `shares *zero* chunks with `document_v1 `, even though 99.9% of the actual content is identical. This is called the **boundary-shift problem** , and it's the reason fixed-size chunking, while simple, performs poorly on real-world edited documents (contracts, source code, logs — anything that gets incrementally modified).
+
+**Attempt 2: Content-defined chunking (variable-size)**
+
+What if, instead of cutting at fixed byte positions, we cut at positions determined by the content itself ? 
+
+Then inserting a byte at the start would only affect the one chunk containing that insertion — every chunk after it stays byte-identical and gets recognized as a duplicate.
+
+This is done using a **rolling hash** — most famously, the **Rabin fingerprint** algorithm (Rabin, 1981), which Windows' post-process engine and many other dedup systems rely on conceptually. 
+
+For more details about Rabin fingerprint 
+
+<https://moinakg.wordpress.com/tag/rabin-fingerprint/>
+
+Here's the intuition, no math required yet:
+
+* Slide a fixed-size "window" (say, 48 bytes) across the file, byte by byte.
+* At every position, compute a fingerprint value from the bytes currently inside the window.
+* Whenever that fingerprint matches a specific pattern (e.g., its lowest N bits are all zero), declare "chunk boundary here."
 
 Because the fingerprint depends only on the *local* bytes under the window, a change far away doesn't affect it. Insert a byte at the start of the file, and the cut points simply *shift along with the insertion* — everything after the edit still produces the exact same chunks as before.
 
