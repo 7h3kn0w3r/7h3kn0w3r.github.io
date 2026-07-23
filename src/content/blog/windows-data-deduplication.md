@@ -280,3 +280,9 @@ First Chunk
 second chunk
 
 ![](/uploads/image2.png)
+
+concatenating them together resulting in the actual file.
+
+![](/uploads/image3.png)
+
+After understanding each component and the recovery process, we can now automate the entire workflow by building an offline recovery tool.
