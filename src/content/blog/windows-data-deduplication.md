@@ -83,13 +83,14 @@ This is *why* content-defined chunking is the standard for real-world dedup: it 
 
 ## Windows Deduplication Storage Architecture
 
-The three core components of Windows Data Deduplication are:
+The four core components of Windows Data Deduplication are:
 
-1. **`$REPARSE_POINT`** – The starting point. It marks the file as deduplicated and provides the metadata required to locate its associated stream.
-2. Stream File / Stream Map – The reconstruction blueprint. It contains the ordered list of chunk references that describes how the original file can be rebuilt.
-3. **Chunk Store (Container Files)** – The physical storage location for the actual data. It stores unique chunks inside container (`.ccc`) files, allowing multiple files to share identical data without duplication.
+1. **REPARSE_POINT** – The starting point. It marks the file as deduplicated and provides the metadata required to locate its associated stream.
+2. **Stream File**  – The reconstruction blueprint. It contains the ordered list of chunk references that describes how the original file can be rebuilt.
+3. Chunk Lookup (Ckhr)
+4. **Chunk Store (Container Files)** – The physical storage location for the actual data. It stores unique chunks inside container (`.ccc`) files, allowing multiple files to share identical data without duplication.
 
-### 1-**`REPARSE_POINT`** 
+### 1-**`REPARSE_POINT`**
 
 This is **not** an introduction to NTFS. Instead, the following sections provide only the concepts necessary to understand how Windows stores and reconstructs deduplicated files.
 
@@ -121,6 +122,32 @@ The `REPARSE_POINT` attribute does **not** contain the actual file data. Instead
 
 > The Stream Header acts as a unique identifier that allows Windows to locate the correct stream metadata for the deduplicated file. This stream metadata contains the mapping between the file and the chunks stored in the Chunk Store.
 
-### 2- The Stream Map File (`.stream` metadata)
+### 2- The Stream File
 
-After a file is optimized, Windows no longer stores the original file contents directly inside the file. Instead, it creates a **Stream File**, which contains the metadata required to reconstruct the original file.
+The REPARSE_POINT does not directly point to the data stored in the Chunk Store. Instead, it contains a **Stream Header**, which uniquely identifies the corresponding **Stream File**.
+
+The Stream File acts as the blueprint for reconstructing the original file. Rather than storing the file's contents, it contains a **Stream Map**—an ordered list of chunk references that describes exactly which chunks must be retrieved and in what order.
+
+When Windows opens a deduplicated file, it performs the following steps:
+
+1. Read the **Stream Header** from the `$REPARSE_POINT`.
+2. Locate the corresponding **Stream File**.
+3. Parse the Stream Map contained within the Stream File.
+4. Retrieve each referenced chunk from the **Chunk Store**.
+5. Reassemble the chunks to reconstruct the original file.
+
+> > **The Stream File acts as a blueprint for reconstructing the original file. It contains a Stream Map that defines the ordered sequence of chunks required to rebuild the file from the Chunk Store.**
+
+#### 3 - Chunk Lookup (Ckhr)
+
+The **Stream File** tells Windows **which chunks** are required to reconstruct a file, but it does not specify **where those chunks are physically stored**.
+
+To locate the actual chunk data, Windows uses a **Chunk Lookup (Ckhr)** structure. The Ckhr acts as an index that maps each chunk reference to its physical location within the Chunk Store.
+
+Using this lookup information, Windows can determine:
+
+* Which container (`.ccc`) file contains the required chunk.
+* The offset of the chunk within the container.
+* The size of the stored chunk.
+
+Without the Ckhr, Windows would have to search every container file to find each required chunk, making reconstruction extremely inefficient.
