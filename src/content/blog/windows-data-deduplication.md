@@ -25,55 +25,103 @@ Imagine a company that stores the following files:
 >
 > File C\
 > Windows_Server_Backup_2026.vhdx
-
-In a traditional file system, each file is stored independently, even if most or all of its content is identical to another file. This results in multiple copies of the same data being written to disk, wasting valuable storage space.
-
-Data Deduplication takes a different approach. Instead of storing each file as a complete, independent copy, it breaks file data into smaller pieces called **chunks**. Each chunk is analyzed, and only unique chunks are stored in a shared storage area known as the **Chunk Store**. If another file contains a chunk that has already been stored, Windows simply creates a reference to the existing chunk instead of writing a duplicate copy.
-
-![](/uploads/gemini_generated_image_xr2xq1xr2xq1xr2x.png)
-
-### This occurs in the following four steps:
-
-1. Scan the file system for files meeting the optimization policy.
-
-   ![](/uploads/understanding-dedup-how-dedup-works-1.gif)
-2. Break files into variable-size chunks.
-
-   ![](/uploads/understanding-dedup-how-dedup-works-2.gif)
-3. Identify unique chunks.
-
-   ![](/uploads/understanding-dedup-how-dedup-works-3.gif)
-4. Place chunks in the chunk store and optionally compress.
-
-   ![](/uploads/understanding-dedup-how-dedup-works-4.gif)
-
-### Where exactly do you cut?
-
-#### Attempt 1: Fixed-size chunking
-
-The simplest idea: cut every file into blocks of exactly, say, 64 KB.
-
-Simple to implement. Fast to compute. But it has a fatal weakness, and it's the single most important concept in this entire chapter, so slow down and read this carefully.
-
-Imagine `document_v1.docx` and `document_v2.docx` are identical except someone typed one extra sentence at the very beginning.
-
-Because fixed-size chunking cuts at rigid byte offsets (0, 64K, 128K, 192K...), inserting even a single byte at the beginning shifts every single chunk boundary that comes after it. The result: `document_v2` shares *zero* chunks with `document_v1`, even though 99.9% of the actual content is identical.
-
-This is called the **boundary-shift problem**, and it's the reason fixed-size chunking, while simple, performs poorly on real-world edited documents (contracts, source code, logs — anything that gets incrementally modified).
-
-#### Attempt 2: Content-defined chunking (variable-size)
-
-What if, instead of cutting at fixed byte positions, we cut at positions determined by the *content itself*? Then inserting a byte at the start would only affect the *one chunk* containing that insertion — every chunk after it stays byte-identical and gets recognized as a duplicate.
-
-This is done using a **rolling hash** — most famously, the **Rabin fingerprint** algorithm (Rabin, 1981), which Windows' post-process engine and many other dedup systems rely on conceptually. 
-
-For more details about Rabin fingerprint <https://moinakg.wordpress.com/tag/rabin-fingerprint/>
-
-Here's the intuition, no math required yet:
-
-1. Slide a fixed-size "window" (say, 48 bytes) across the file, byte by byte.
-2. At every position, compute a fingerprint value from the bytes currently inside the window.
-3. Whenever that fingerprint matches a specific pattern (e.g., its lowest N bits are all zero), declare "chunk boundary here."
+>
+> In a traditional file system, each file is stored independently, even if most or all of its content is identical to another file. This results in multiple copies of the same data being written to disk, wasting valuable storage space.
+>
+> Data Deduplication takes a different approach. Instead of storing each file as a complete, independent copy, it breaks file data into smaller pieces called 
+>
+> **chunks**
+>
+> . Each chunk is analyzed, and only unique chunks are stored in a shared storage area known as the 
+>
+> **Chunk Store**
+>
+> . If another file contains a chunk that has already been stored, Windows simply creates a reference to the existing chunk instead of writing a duplicate copy.
+>
+> This occurs in the following four steps:
+>
+> * Scan the file system for files meeting the optimization policy.
+>
+>   ![](/uploads/understanding-dedup-how-dedup-works-1.gif)
+> * Break files into variable-size chunks.
+>
+>   ![](/uploads/understanding-dedup-how-dedup-works-2.gif)
+> * Identify unique chunks.
+>
+>   ![](/uploads/understanding-dedup-how-dedup-works-3.gif)
+> * Place chunks in the chunk store and optionally compress.
+>
+>   ![](/uploads/understanding-dedup-how-dedup-works-4.gif)
+>
+> Where exactly do you cut?
+>
+> Attempt 1: Fixed-size chunking
+>
+> The simplest idea: cut every file into blocks of exactly, say, 64 KB.
+>
+> Simple to implement. Fast to compute. But it has a fatal weakness, and it's the single most important concept in this entire chapter, so slow down and read this carefully.
+>
+> Imagine 
+>
+> `document_v1.docx`
+>
+>  and 
+>
+> `document_v2.docx`
+>
+>  are identical except someone typed one extra sentence at the very beginning.
+>
+> Because fixed-size chunking cuts at rigid byte offsets (0, 64K, 128K, 192K...), inserting even a single byte at the beginning shifts every single chunk boundary that comes after it. The result: 
+>
+> `document_v2`
+>
+>  shares 
+>
+> *zero*
+>
+>  chunks with 
+>
+> `document_v1`
+>
+> , even though 99.9% of the actual content is identical.
+>
+> This is called the 
+>
+> **boundary-shift problem**
+>
+> , and it's the reason fixed-size chunking, while simple, performs poorly on real-world edited documents (contracts, source code, logs — anything that gets incrementally modified).
+>
+> Attempt 2: Content-defined chunking (variable-size)
+>
+> What if, instead of cutting at fixed byte positions, we cut at positions determined by the 
+>
+> *content itself*
+>
+> ? Then inserting a byte at the start would only affect the 
+>
+> *one chunk*
+>
+>  containing that insertion — every chunk after it stays byte-identical and gets recognized as a duplicate.
+>
+> This is done using a 
+>
+> **rolling hash**
+>
+>  — most famously, the 
+>
+> **Rabin fingerprint**
+>
+>  algorithm (Rabin, 1981), which Windows' post-process engine and many other dedup systems rely on conceptually. 
+>
+> For more details about Rabin fingerprint 
+>
+> <https://moinakg.wordpress.com/tag/rabin-fingerprint/>
+>
+> Here's the intuition, no math required yet:
+>
+> * Slide a fixed-size "window" (say, 48 bytes) across the file, byte by byte.
+> * At every position, compute a fingerprint value from the bytes currently inside the window.
+> * Whenever that fingerprint matches a specific pattern (e.g., its lowest N bits are all zero), declare "chunk boundary here."
 
 Because the fingerprint depends only on the *local* bytes under the window, a change far away doesn't affect it. Insert a byte at the start of the file, and the cut points simply *shift along with the insertion* — everything after the edit still produces the exact same chunks as before.
 
@@ -88,9 +136,9 @@ The four core components of Windows Data Deduplication are:
 1. **REPARSE_POINT** – The starting point. It marks the file as deduplicated and provides the metadata required to locate its associated stream.
 2. **Stream File**  – The reconstruction blueprint. It contains the ordered list of chunk references that describes how the original file can be rebuilt.
 3. Chunk Lookup (Ckhr)
-4. **Chunk Store (Container Files)** – The physical storage location for the actual data. It stores unique chunks inside container (`.ccc`) files, allowing multiple files to share identical data without duplication.
+4. Chunk Store (Container Files) – The physical storage location for the actual data. It stores unique chunks inside container (`.ccc`) files, allowing multiple files to share identical data without duplication.
 
-### 1-**`REPARSE_POINT`**
+### 1-**REPARSE_POINT**
 
 This is **not** an introduction to NTFS. Instead, the following sections provide only the concepts necessary to understand how Windows stores and reconstructs deduplicated files.
 
@@ -115,12 +163,6 @@ Among the most important fields are:
 * **Stream Header** – A unique identifier used to locate the corresponding stream metadata. The stream metadata describes how the original file can be reconstructed by referencing chunks stored in the Chunk Store.
 
 The `REPARSE_POINT` attribute does **not** contain the actual file data. Instead, it provides the information required for Windows to locate the stream metadata, which ultimately leads to the chunks needed to reconstruct the original file.
-
-#### Reverse Engineering the `$REPARSE_POINT`
-
-![](/uploads/gemini_generated_image_d0i1ldd0i1ldd0i1.png)
-
-> The Stream Header acts as a unique identifier that allows Windows to locate the correct stream metadata for the deduplicated file. This stream metadata contains the mapping between the file and the chunks stored in the Chunk Store.
 
 ### 2- The Stream File
 
@@ -151,3 +193,56 @@ Using this lookup information, Windows can determine:
 * The size of the stored chunk.
 
 Without the Ckhr, Windows would have to search every container file to find each required chunk, making reconstruction extremely inefficient.
+
+In other words, the **Stream File describes *what* chunks are needed**, while the **Ckhr describes *where* those chunks are stored**. Together, they provide all the information required to retrieve the data from the Chunk Store and reconstruct the original file.
+
+### **4 - Chunk Store (Container Files)**
+
+The **Chunk Store** is where Windows stores the actual data of deduplicated files. Unlike traditional file systems that store complete files, the Chunk Store stores only **unique chunks**, allowing identical data to be shared among multiple files.
+
+All chunk data is stored under the following directory:
+
+```
+System Volume Information
+└── Dedup
+    └── ChunkStore
+        └── {Chunk Store GUID}.ddp
+            ├── Data <---
+            ├── Stream
+            ├── Hotspot
+            └── stamp.dat
+```
+
+The **Data** directory contains the container (`.ccc`) files that hold the physical chunk data.
+
+```
+
+```
+
+Instead of creating one file for every chunk, Windows packs many chunks into a single container file. This significantly reduces NTFS metadata overhead and improves storage efficiency.
+
+Conceptually, a container file can be viewed as follows:
+
+```
+Container (.ccc)
+
++-------------------------+
+| Chunk #1                |
++-------------------------+
+| Chunk #2                |
++-------------------------+
+| Chunk #3                |
++-------------------------+
+| Chunk #4                |
++-------------------------+
+| ...                     |
++-------------------------+
+```
+
+Each chunk stored inside a container has its own metadata, including information such as its location, size, and compression state. During reconstruction, Windows uses the chunk references obtained from the Stream File together with the lookup metadata to locate the required chunk inside the appropriate container.
+
+At this point, we have identified all of the core components involved in Windows Data Deduplication. The next step is to reverse engineer the container format itself and understand how individual chunks are stored inside a `.ccc` file. 
+
+- - -
+
+# Practical Analysis
