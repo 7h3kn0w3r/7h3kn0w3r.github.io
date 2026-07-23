@@ -249,3 +249,22 @@ Stream\
 
 
 Now, let's reverse engineer the Stream File to understand its structure and how Windows maps a deduplicated file to its chunks.
+
+![](/uploads/seaction-header-1-.png)
+
+At offset 0x70 starts the first hash sequence where at 0x78 there is the absolute position in the chunkstore is at 0x6CE20 and at offset 0x88 the 32 byte hash, The value at offset 0xA8 is the length of the chunk payload 0xEEA7.
+
+the second the second hash section is at offset B0 where the the absolute position in the chunkstore is at 0x7BD20 and chuck payload  length is 0x733A.
+
+Now we can move to the Chunk Store located at:
+
+```
+System Volume Information\Dedup\ChunkStore\
+{6F89FF76-AE45-4802-BD0E-4075177C075F}.ddp\
+Data\
+00000001.00000001.ccc
+```
+
+This is where the actual chunk data is physically stored. Unlike the Stream File, which only contains metadata and chunk references, the Chunk File stores the compressed data blocks that make up the original file.
+
+Now, let's reverse engineer the Chunk File to understand its internal structure and how Windows stores the physical chunk data used to reconstruct a deduplicated file.
