@@ -3,43 +3,19 @@ import Layout from '../layouts/Layout.astro';
 
 const projects = [
   {
-    title: "Athena Core",
-    description: "A high-performance shellcode execution framework built in Rust, featuring dynamic call obscuring and memory encryption.",
-    tags: ["Rust", "Windows API", "Evasion", "Security"],
-    github: "https://github.com",
+  title: "DedupInspector",
+  description:
+    "Offline Windows Data Deduplication explorer and recovery tool for digital forensics. Reconstructs deduplicated files from an exported $MFT, Stream, and Chunk metadata.",
+  tags: [
+    "C++",
+    "Win32",
+    "DFIR",
+    "NTFS",
+    "Reverse Engineering"
+  ],
+  github: "https://github.com/7h3kn0w3r/DedupInspector",
+  live: "https://7h3kn0w3r.github.io/blog/windows-data-deduplication/"
   },
-  {
-    title: "PacketSentry",
-    description: "A lightweight network packet inspection daemon written in Go, focusing on raw socket parsing and real-time anomaly detection.",
-    tags: ["Go", "Linux", "Networking", "Security"],
-    github: "https://github.com",
-    live: "https://example.com"
-  },
-  {
-    title: "FirmAudit CLI",
-    description: "An automated firmware parsing and analysis tool chain that unpacks image blocks and scans binary paths for CVE vulnerabilities.",
-    tags: ["Python", "Binwalk", "Static Analysis", "IoT"],
-    github: "https://github.com",
-  },
-  {
-    title: "HydraInject",
-    description: "A proof-of-concept DLL injector demonstrating process injection via thread hijacking and asynchronous procedure calls.",
-    tags: ["C++", "Win32 API", "Injectors", "Malware Dev"],
-    github: "https://github.com"
-  },
-  {
-    title: "K-Probe",
-    description: "A Linux Kernel Module (LKM) monitoring write system calls on specific files to detect unauthorized edits.",
-    tags: ["C", "Linux Kernel", "Rootkits", "Audit"],
-    github: "https://github.com"
-  },
-  {
-    title: "Noir Trace Portfolio",
-    description: "Source code of this developer portfolio website built with Astro, Tailwind CSS, Decap CMS, and Pagefind search.",
-    tags: ["Astro", "TailwindCSS", "Pagefind", "DecapCMS"],
-    github: "https://github.com",
-    live: "/"
-  }
 ];
 ---
 
@@ -74,12 +50,12 @@ const projects = [
             
             <div class="flex items-center space-x-3 font-mono text-[10px] uppercase">
               <a href={project.github} target="_blank" rel="noopener noreferrer" class="text-accent hover:text-white transition-colors">
-                [ GITHUB ]
+                [ Tool ]
               </a>
               {project.live && (
                 <span class="text-neutral-700">//</span>
                 <a href={project.live} class="text-neutral-400 hover:text-white transition-colors">
-                  [ LIVE / DEMO ]
+                  [ Research ]
                 </a>
               )}
             </div>
